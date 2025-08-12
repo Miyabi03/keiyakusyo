@@ -334,7 +334,7 @@ calculateBtn.addEventListener('click', () => {
 
   // 表示用金額
   const monthlyAmount = data.monthly;                       // 一回のお支払い金額
-  const totalAmount   = data.total;                         // お支払総額（頭金＋分割）
+  const totalAmount   = data.total;                         // お支払総額（商品の金額）
   const installmentTotal = monthlyAmount * installments;    // 分割総額
 
   // 契約合意日
@@ -348,14 +348,14 @@ calculateBtn.addEventListener('click', () => {
   // 毎月の引落日は固定で13日
   const monthlyWithdrawDay = '毎月13日';
 
-  // 結果表示
+  // 結果表示（ラベルを「お支払総額（商品の金額）」に変更）
   resultDiv.innerHTML = `
     <div class="result-grid">
       <div class="label">プラン</div><div class="value">${plan}</div>
       <div class="label">分割回数</div><div class="value">${installments}回</div>
       <div class="label">頭金</div><div class="value">${yen(downPayment)}</div>
 
-      <div class="label">お支払総額</div><div class="value">${yen(totalAmount)}</div>
+      <div class="label">お支払総額（商品の金額）</div><div class="value">${yen(totalAmount)}</div>
       <div class="label">一回のお支払い金額</div><div class="value">${yen(monthlyAmount)}</div>
       <div class="label">分割総額</div><div class="value">${yen(installmentTotal)}</div>
 
