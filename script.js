@@ -1,6 +1,6 @@
 // script.js
 
-// 料金プランの全組み合わせデータ（既存定義をそのまま使用）
+// 料金プランの全組み合わせデータ
 const feeData = {
   "スタンダード-0-6": { monthly: 140900, total: 845400 },
   "スタンダード-10000-6": { monthly: 139100, total: 844600 },
@@ -195,7 +195,7 @@ const feeData = {
   "プライム-900000-60": { monthly: 28600, total: 2616000 },
   "プライム-1000000-60": { monthly: 26000, total: 2560000 },
 
-  // ここから「プライム（割引）」＝ UI表記「アップセル」
+  /* UI表記「アップセル」→ 内部キーは「プライム（割引）」 */
   "プライム（割引）-0-6": { monthly: 208600, total: 1251600 },
   "プライム（割引）-10000-6": { monthly: 206900, total: 1251400 },
   "プライム（割引）-30000-6": { monthly: 203300, total: 1249800 },
@@ -289,7 +289,7 @@ const contractDateInput = document.getElementById('contract-date');
 const calculateBtn = document.getElementById('calculate-btn');
 const resultDiv = document.getElementById('result');
 
-// UI表示「アップセル」→ 内部キー「プライム（割引）」エイリアス
+// UI表示「アップセル」→ 内部キー「プライム（割引）」のエイリアス
 const aliasPlan = (p) => (p === 'アップセル' ? 'プライム（割引）' : p);
 
 // 初期表示：契約合意日に本日をセット
@@ -301,7 +301,7 @@ const aliasPlan = (p) => (p === 'アップセル' ? 'プライム（割引）' :
   contractDateInput.value = `${y}-${m}-${d}`;
 })();
 
-// 和暦ではなく日本語表記のフォーマッタ
+// 日付：日本語表記
 const formatDateJP = (dt) =>
   `${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日`;
 
@@ -310,7 +310,7 @@ const yen = (n) => Number(n).toLocaleString('ja-JP') + '円';
 
 // 「計算する」クリック
 calculateBtn.addEventListener('click', () => {
-  const plan = planSelect.value;
+  const plan = planSelect.value;                 // UI表示名（スタンダード / プライム / アップセル）
   const downPaymentStr = downPaymentSelect.value;
   const installmentsStr = installmentsSelect.value;
   const contractDateStr = contractDateInput.value;
@@ -320,7 +320,7 @@ calculateBtn.addEventListener('click', () => {
     return;
   }
 
-  // feeDataのキー形式に合わせる（アップセルは内部「プライム（割引）」に変換）
+  // feeDataキー用にエイリアスを適用
   const key = `${aliasPlan(plan)}-${downPaymentStr}-${installmentsStr}`;
   const data = feeData[key];
 
@@ -333,23 +333,22 @@ calculateBtn.addEventListener('click', () => {
   const installments = Number(installmentsStr);
 
   // 表示用金額
-  const monthlyAmount = data.monthly;                  // 一回のお支払い金額
-  const totalAmount   = data.total;                    // お支払総額（＝頭金＋分割総額）
-  const installmentTotal = monthlyAmount * installments; // 分割総額（整合性のため計算）
+  const monthlyAmount = data.monthly;                       // 一回のお支払い金額
+  const totalAmount   = data.total;                         // お支払総額（頭金＋分割）
+  const installmentTotal = monthlyAmount * installments;    // 分割総額
 
   // 契約合意日
   const [yy, mm, dd] = contractDateStr.split('-').map(Number);
   const agreed = new Date(yy, mm - 1, dd);
 
-  // 初回引落日ルール：
-  // 20日まで → 翌月13日、21日以降 → 翌々月13日
+  // 初回引落日：20日まで→翌月13日、21日以降→翌々月13日
   const addMonths = (dd <= 20) ? 1 : 2;
   const firstPaymentDate = new Date(agreed.getFullYear(), agreed.getMonth() + addMonths, 13);
 
   // 毎月の引落日は固定で13日
   const monthlyWithdrawDay = '毎月13日';
 
-  // 結果描画
+  // 結果表示
   resultDiv.innerHTML = `
     <div class="result-grid">
       <div class="label">プラン</div><div class="value">${plan}</div>
